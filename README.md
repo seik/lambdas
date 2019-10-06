@@ -1,1 +1,3 @@
-# lambdas
+# λ
+
+The λ I use.
