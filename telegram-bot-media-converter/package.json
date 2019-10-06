@@ -1,0 +1,11 @@
+{
+  "name": "telegram-bot-media-converter",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "serverless": "^1.48.0"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^4.3.0"
+  }
+}

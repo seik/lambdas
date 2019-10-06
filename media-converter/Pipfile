@@ -1,0 +1,15 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+black = "==19.3b0"
+rope = "==0.14.0"
+
+[packages]
+boto3 = "==1.9.188"
+ffmpeg-python = "==0.2.0"
+
+[requires]
+python_version = "3.7"

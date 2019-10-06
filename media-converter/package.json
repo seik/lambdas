@@ -1,0 +1,11 @@
+{
+  "name": "ffmpeg",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "serverless": "^1.47.0"
+  },
+  "devDependencies": {
+    "serverless-python-requirements": "^4.3.0"
+  }
+}

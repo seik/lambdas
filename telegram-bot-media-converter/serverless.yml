@@ -1,0 +1,47 @@
+service: telegram-bot-media-converter
+provider:
+  name: aws
+  runtime: python3.7
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-west-3'}
+  timeout: 900
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:PutObject
+      Resource: "arn:aws:s3:::${self:custom.s3-bucket-name-input}/*"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:PutObject
+      Resource: "arn:aws:s3:::${self:custom.s3-bucket-name-output}/*"
+  environment:
+    TELEGRAM_TOKEN: ${env:TELEGRAM_TOKEN}
+    OUTPUT_BUCKET_NAME: "${self:custom.s3-bucket-name-output}"
+    INPUT_BUCKET_NAME: "${self:custom.s3-bucket-name-input}"
+
+
+functions:
+  bot:
+    handler: bot.bot
+    events:
+      - http: POST /
+  on-convert:
+    handler: bot.on_convert
+    events:
+      - s3: 
+          bucket: "${self:custom.s3-bucket-name-output}"
+          event: s3:ObjectCreated:*
+          existing: true
+  set-webhook:
+    handler: bot.set_webhook
+    events:
+      - http: POST set-webhook
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  s3-bucket-name-input: media-converter-input
+  s3-bucket-name-output: media-converter-output
