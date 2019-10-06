@@ -24,7 +24,7 @@ provider:
 
 functions:
   bot:
-    handler: bot.bot
+    handler: bot.handler
     events:
       - http: POST /
   on-convert:

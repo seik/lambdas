@@ -1,4 +1,3 @@
-import base64
 import logging
 import os
 import uuid
@@ -8,6 +7,8 @@ from typing import Tuple
 import boto3
 import ffmpeg as ffmpeg_client
 
+from common.media_converter.constants import target_formats, target_formats_list, input_formats_list, input_formats
+
 logger = logging.getLogger()
 if logger.handlers:
     for handler in logger.handlers:
@@ -15,12 +16,6 @@ if logger.handlers:
 logging.basicConfig(level=logging.INFO)
 
 s3 = boto3.client("s3")
-
-input_formats = {"video": ["mp4", "mov", "mkv", "m4a"]}
-input_formats_list = list(set(*input_formats.values()))
-
-target_formats = {"video": ["mp3", "mp4", "mov", "m4a"]}
-target_formats_list = list(set(*target_formats.values()))
 
 
 def get_formats(s3_object) -> Tuple[str, str]:
@@ -62,7 +57,7 @@ def convert(event, context):
         return
 
     for record in event["Records"]:
-        if not "s3" in record:
+        if "s3" not in record:
             logger.info("Not a S3 invocation")
             continue
 
@@ -81,8 +76,8 @@ def convert(event, context):
             continue
 
         if (
-            input_format in input_formats["video"]
-            and target_format in target_formats["video"]
+                input_format in input_formats["video"]
+                and target_format in target_formats["video"]
         ):
             video(
                 record,

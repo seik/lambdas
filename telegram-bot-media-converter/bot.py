@@ -1,12 +1,11 @@
 import json
 import logging
 import os
-import random
 import uuid
 from datetime import datetime, timedelta
-
 import boto3
 import telegram
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 logger = logging.getLogger()
 if logger.handlers:
@@ -32,16 +31,18 @@ def configure_telegram():
     Returns a bot instance.
     """
 
-    TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-    if not TELEGRAM_TOKEN:
+    telegram_token = os.environ.get("TELEGRAM_TOKEN")
+    if not telegram_token:
         logger.error("The TELEGRAM_TOKEN must be set")
         raise NotImplementedError
 
-    return telegram.Bot(TELEGRAM_TOKEN)
+    return telegram.Bot(telegram_token)
 
 
-def bot(event, context):
-    bot = configure_telegram()
+bot = configure_telegram()
+
+
+def handler(event, context):
     logger.info(f"Event: {event}")
 
     if event.get("httpMethod") == "POST" and event.get("body"):
@@ -52,7 +53,7 @@ def bot(event, context):
         attachment = update.effective_message.effective_attachment
 
         if text in ["/start", f"/start@{BOT_USERMAME}"]:
-            bot.send_message(chat_id=chat_id, text="Beep boop")
+            bot.send_message(chat_id=chat_id, text="Beep boop I'm under construction!")
         elif attachment:
             bot.send_message(chat_id=chat_id, text="Processing...")
 
@@ -85,12 +86,12 @@ def bot(event, context):
 def on_convert(event, context):
     logger.info(f"Event: {event}")
 
-    if not "Records" in event:
+    if "Records" not in event:
         logger.info("Not a S3 invocation")
         return
 
     for record in event["Records"]:
-        if not "s3" in record:
+        if "s3" not in record:
             logger.info("Not a S3 invocation")
             continue
 
@@ -105,7 +106,6 @@ def on_convert(event, context):
 
         chat_id = s3_object["Metadata"].get("chat-id")
 
-        bot = configure_telegram()
         bot.send_message(
             chat_id=chat_id, text=f"https://{bucket}.s3.amazonaws.com/{key}"
         )
@@ -115,8 +115,6 @@ def set_webhook(event, context):
     """
     Sets the Telegram bot webhook.
     """
-
-    bot = configure_telegram()
     host = event.get("headers").get("Host")
     stage = event.get("requestContext").get("stage")
     url = f"https://{host}/{stage}/"
@@ -126,3 +124,13 @@ def set_webhook(event, context):
         return OK_RESPONSE
 
     return ERROR_RESPONSE
+
+
+def build_inline_keyboard(file_name: str, file_extension: str) -> InlineKeyboardMarkup:
+    keyboard = []
+    formats = []
+    for format_name in formats:
+        callback_data = f'{file_name}-{file_extension}__{format_name}'
+        keyboard.append(InlineKeyboardButton(format_name, callback_data=callback_data))
+
+    return InlineKeyboardMarkup(keyboard)
